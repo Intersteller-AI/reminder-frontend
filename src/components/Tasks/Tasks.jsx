@@ -1,5 +1,5 @@
 // @ts-nocheck
-import {  useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { taskActions } from "../../store/reducers/tasks";
@@ -7,15 +7,13 @@ import TaskModal from "../Modal/TaskModal";
 import { HOST } from "../../server";
 import TaskTable from "../Table/TaskTable";
 import DeleteModal from "../Modal/DeleteModal";
+import axios from "axios";
 
-const tasks = async (page, limit) => {
+const reminders = async () => {
   try {
-    const res = await fetch(`${HOST}/api/tasks?page=${page}&limit=${limit}`, {
-      method: "GET",
-      credentials: "include",
+    const { data } = await axios.get(`${HOST}/api/reminders`, {
+      withCredentials: true,
     });
-
-    const data = await res.json();
 
     return data;
   } catch (error) {
@@ -25,16 +23,18 @@ const tasks = async (page, limit) => {
 
 const Tasks = () => {
   const [rows, setRows] = useState([]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteModalId, setDeleteModalId] = useState(null);
+  const [taskData, setTaskData] = useState({
+    name: "",
+    description: "",
+    date: "",
+  });
 
   const dispatch = useDispatch();
   const { data, refetch } = useQuery({
-    queryFn: () => tasks(page + 1, rowsPerPage),
-    queryKey: ["tasks/fetch-tasks", page, rowsPerPage],
+    queryFn: () => reminders(),
+    queryKey: ["reminders"],
   });
   const { modalOpen } = useSelector((state) => state.task);
   const { userInfo } = useSelector((state) => state.user);
@@ -51,27 +51,12 @@ const Tasks = () => {
     dispatch(taskActions.setTaskData(row));
   };
 
-  // create new task
-
   const addTaskClickHandler = () => {
     dispatch(taskActions.setModalOpen(true));
-    dispatch(
-      taskActions.setTaskData({
-        description: "",
-        date: "",
-      })
-    );
-  };
-
-  const handleChangePage = (e, newPage) => {
-    setPage(newPage);
-    refetch();
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-    refetch();
+    setTaskData({
+      description: "",
+      date: "",
+    });
   };
 
   const handleDeleteModal = (e, row) => {
@@ -82,23 +67,20 @@ const Tasks = () => {
   return (
     <div className="relative flex flex-1 flex-col gap-7 overflow-hidden px-10 py-14">
       <div className="">
-        <h1 className="font-semibold md:text-xl">To Do</h1>
+        <h1 className="font-semibold md:text-xl">Reminders</h1>
         <div className="mt-4 w-full border-b-2 border-slate-300" />
       </div>
       <TaskTable
-        handleChangePage={handleChangePage}
-        handleChangeRowsPerPage={handleChangeRowsPerPage}
         handleDeleteModal={handleDeleteModal}
         rows={rows}
         addTaskClickHandler={addTaskClickHandler}
         handleModalOpen={handleModalOpen}
-        totalPages={totalPages}
-        rowsPerPage={rowsPerPage}
-        page={page}
       />
       <TaskModal
         refetch={refetch}
         userInfo={userInfo}
+        taskData={taskData}
+        setTaskData={setTaskData}
       />
       <DeleteModal
         open={deleteModal}

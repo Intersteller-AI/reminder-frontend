@@ -8,31 +8,23 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableFooter,
   TableHead,
-  TablePagination,
   TableRow,
   Toolbar,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
 import { AiFillDelete } from "react-icons/ai";
 import { BiMessageSquareEdit } from "react-icons/bi";
 
 const COLUMNS = [
-  { field: "title", headerName: "Title", width: 220 },
+  { field: "description", headerName: "Title", width: 220 },
   {
-    field: "deadline",
-    headerName: "Deadline",
-    width: 180,
+    field: "date",
+    headerName: "Time",
+    width: 120,
     align: "left",
     headerAlign: "left",
-    valueGetter: (params) => calculateTime(params.row.deadline),
-  },
-  {
-    field: "status",
-    headerName: "Status",
-    width: 200,
+    valueGetter: (params) => calculateTime(params.row.date),
   },
   {
     field: "actions",
@@ -45,16 +37,11 @@ const TaskTable = ({
   addTaskClickHandler,
   isLoading,
   rows,
-  handleChangePage,
-  handleChangeRowsPerPage,
   handleDeleteModal,
   handleModalOpen,
-  totalPages,
-  rowsPerPage,
-  page,
 }) => {
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-y-auto max-h-[50vh]">
       <Box
         sx={{
           height: 500,
@@ -74,7 +61,7 @@ const TaskTable = ({
               startIcon={<AddIcon />}
               onClick={addTaskClickHandler}
             >
-              Add Task
+              Set Reminder
             </Button>
           </Toolbar>
           <Table aria-label="custom pagination table">
@@ -91,29 +78,13 @@ const TaskTable = ({
                   <TableCell colSpan={3}>Loading...</TableCell>
                 </TableRow>
               ) : (
-                rows?.map((row) => (
-                  <TableRow key={row.title}>
+                rows?.map((row, index) => (
+                  <TableRow key={index}>
                     <TableCell align="left" width={180} className="capitalize">
-                      {row.title}
+                      {row.description}
                     </TableCell>
                     <TableCell align="left" width={180} className="capitalize">
-                      {calculateTime(row.deadline)}
-                    </TableCell>
-                    <TableCell align="left" width={220} className="capitalize">
-                      <div className="flex items-center justify-start gap-2 capitalize">
-                        <span
-                          className={`h-2 w-2 rounded-full ${
-                            row?.status.toLowerCase() === "in progress"
-                              ? "bg-yellow-300"
-                              : row?.status.toLowerCase() === "done"
-                              ? "bg-blue-500"
-                              : row?.status.toLowerCase() === "active"
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          } drop-shadow-sm`}
-                        ></span>
-                        <span className="font-semibold">{row?.status}</span>
-                      </div>{" "}
+                      {calculateTime(row.date)}
                     </TableCell>
                     <TableCell align="left" width={100} className="capitalize">
                       <div className="flex items-center gap-2">
@@ -135,31 +106,9 @@ const TaskTable = ({
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
+                )).reverse()
               )}
             </TableBody>
-            <TableFooter
-              style={{
-                width: "100%",
-              }}
-            >
-              <TableRow
-                sx={{
-                  width: "100%",
-                }}
-              >
-                <TablePagination
-                  rowsPerPageOptions={[1, 5]}
-                  colSpan={5}
-                  count={totalPages}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  ActionsComponent={TablePaginationActions}
-                />
-              </TableRow>
-            </TableFooter>
           </Table>
         </TableContainer>
       </Box>

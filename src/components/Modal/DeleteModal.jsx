@@ -13,7 +13,7 @@ import { DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
 const deleteTask = async (id) => {
   try {
-    const { data } = await axios.delete(`${HOST}/api/tasks/${id}`, {
+    const { data } = await axios.delete(`${HOST}/api/reminders/${id}`, {
       withCredentials: true,
     });
     return data;

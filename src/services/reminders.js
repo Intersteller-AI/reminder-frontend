@@ -3,7 +3,7 @@ import { HOST } from "../server";
 
 export const createNewTask = async ({ taskData }) => {
   try {
-    const { data } = await axios.post(`${HOST}/api/tasks/`, taskData, {
+    const { data } = await axios.post(`${HOST}/api/reminders/`, taskData, {
       withCredentials: true,
       headers: {
         "Content-Type": "application/json",
@@ -22,7 +22,7 @@ export const createNewTask = async ({ taskData }) => {
 export const updateTask = async ({ taskData }) => {
   try {
     const { data } = await axios.put(
-      `${HOST}/api/tasks/`,
+      `${HOST}/api/reminders/`,
       { ...taskData },
       {
         withCredentials: true,

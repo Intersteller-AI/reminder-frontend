@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { ModalClose, Sheet } from "@mui/joy";
 import { Modal } from "@mui/material";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { taskActions } from "../../store/reducers/tasks";
 import toast from "react-hot-toast";
@@ -10,41 +10,36 @@ import { useMutation } from "@tanstack/react-query";
 import DateTimePick from "../DateTimePick";
 import SubmitButton from "../SubmitButton";
 import Description from "../Description";
+import Title from "../Title";
 
-const TaskModal = ({ refetch }) => {
-  const { modalOpen, taskData } = useSelector((state) => state.task);
+const TaskModal = ({ refetch, taskData, setTaskData }) => {
+  const { modalOpen } = useSelector((state) => state.task);
   const dispatch = useDispatch();
   const changeRef = useRef();
 
   const handleModalClose = () => {
     dispatch(taskActions.setModalOpen(false));
-    dispatch(taskActions.setTaskData({}));
-    dispatch(taskActions.setIsNew(false));
+    setTaskData({
+      description: "",
+      date: "",
+    });
   };
 
   const handleCalenderChange = (newValue) => {
-    dispatch(
-      taskActions.setTaskData({
-        ...taskData,
-        date: newValue.toISOString(),
-      })
-    );
-    if (taskData.description && taskData.date) {
-      changeRef.current.style.display = "block";
-    }
+    const newDate = newValue.toISOString();
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = { ...prevTaskData, date: newDate };
+      return updatedTaskData;
+    });
   };
 
-  const handleChange = (e) => {
-    dispatch(
-      taskActions.setTaskData({
-        ...taskData,
-        description: e.target.value,
-      })
-    );
-    if (taskData.description && taskData.date) {
+
+  console.log(taskData);
+  useEffect(() => {
+    if (taskData.description && taskData.date && taskData.name) {
       changeRef.current.style.display = "block";
     }
-  };
+  }, [taskData]);
 
   const { mutate: createNewMutate, isLoading: createNewIsLoading } =
     useMutation({
@@ -53,7 +48,7 @@ const TaskModal = ({ refetch }) => {
       },
       onSuccess: (data) => {
         refetch();
-        toast.success("Task created successfully!");
+        toast.success("Reminder created successfully!");
         dispatch(taskActions.setModalOpen(false));
       },
       onError: (error) => {
@@ -73,7 +68,7 @@ const TaskModal = ({ refetch }) => {
     },
     onSuccess: (data) => {
       refetch();
-      toast.success("Task updated successfully!");
+      toast.success("Reminder updated successfully!");
       dispatch(taskActions.setModalOpen(false));
     },
     onError: (error) => {
@@ -123,7 +118,11 @@ const TaskModal = ({ refetch }) => {
           {/* description and info section */}
           <div className="mt-2 h-full md:px-4 ">
             <div className="flex h-full flex-col py-2">
-              <Description handleChange={handleChange} taskData={taskData} />
+              <Title
+                taskData={taskData}
+                setTaskData={setTaskData}
+              />
+              <Description taskData={taskData} setTaskData={setTaskData}/>
               <div className="relative flex flex-col gap-4 py-4">
                 <DateTimePick
                   handleCalenderChange={handleCalenderChange}

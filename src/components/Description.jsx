@@ -1,8 +1,16 @@
 import React from "react";
 
-const Description = ({handleChange, taskData}) => {
+const Description = ({ setTaskData, taskData }) => {
+  const handleChange = (e) => {
+    const { value } = e.target;
+    setTaskData((prevTaskData) => {
+      const updatedTaskData = { ...prevTaskData, description: value };
+      return updatedTaskData;
+    });
+  };
+
   return (
-    <div className="h-[20vh] w-[80vw] md:w-[50vw] lg:w-[30vw]">
+    <div className="mt-6 h-[20vh] w-[80vw] md:w-[50vw] lg:w-[30vw]">
       <textarea
         placeholder="What reminder you want to set ?"
         value={taskData.description}
